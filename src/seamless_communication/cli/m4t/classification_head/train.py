@@ -18,8 +18,8 @@ import torch
 from torch.optim import AdamW
 from fairseq2.optim.lr_scheduler import MyleLR
 
+from seamless_communication.cli.m4t.classification_head import dataloader, dist_utils
 from seamless_communication.models.unity import UnitYModel
-from seamless_communication.cli.m4t.finetune import dataloader, dist_utils, trainer
 from seamless_communication.models.unity import (
     load_unity_model,
     load_unity_text_tokenizer,
@@ -161,7 +161,7 @@ def init_parser() -> argparse.ArgumentParser:
 
 def train(head: torch.nn.Module,
             frozen_model: UnitYModel,
-            dataloader: dataloader.UnitYDataLoader,
+            dataloader: dataloader.UnitYLanguageIDDataLoader,
             params: ClassificationHeadTrainParams,
             label_weights: torch.Tensor = None):
     
@@ -255,7 +255,7 @@ def main() -> None:
     model = model.to(device)
 
     # Create daataloaders
-    train_dataloader = dataloader.UnitYDataLoader(
+    train_dataloader = dataloader.UnitYLanguageIDDataLoader(
         text_tokenizer=text_tokenizer,
         unit_tokenizer=unit_tokenizer,
         batching_config=dataloader.BatchingConfig(
