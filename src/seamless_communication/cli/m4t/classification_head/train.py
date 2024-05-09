@@ -18,7 +18,7 @@ import torch
 from torch.optim import AdamW
 from fairseq2.optim.lr_scheduler import MyleLR
 
-from seamless_communication.cli.m4t.classification_head import dataloader, dist_utils
+from seamless_communication.cli.m4t.classification_head import dataloader
 from seamless_communication.models.unity import UnitYModel
 from seamless_communication.models.unity import (
     load_unity_model,
@@ -225,8 +225,6 @@ def train(head: torch.nn.Module,
 def main() -> None:
     args = init_parser().parse_args()
     device = torch.device(args.device)
-    
-    dist_utils.init_distributed([logger])
     float_dtype = torch.float16 if torch.device(args.device).type != "cpu" else torch.bfloat16
     
     text_tokenizer = load_unity_text_tokenizer(args.model_name)
@@ -253,8 +251,6 @@ def main() -> None:
         unit_tokenizer=unit_tokenizer,
         batching_config=dataloader.BatchingConfig(
             batch_size=args.batch_size,
-            rank=dist_utils.get_rank(),
-            world_size=dist_utils.get_world_size(),
             max_audio_length_sec=15.0,
             float_dtype=float_dtype,
         ),
