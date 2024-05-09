@@ -39,19 +39,19 @@ class ClassificationHeadTrainParams:
     save_model_path: Path
     
     max_epochs: int = 10
-    """ Maximum number of trainign epochs"""
+    """Maximum number of trainign epochs"""
 
     warmup_steps: int = 100
-    """ Number of steps with linearly increasing LR"""
+    """Number of steps with linearly increasing LR"""
 
     learning_rate: float = 1e-5
-    """ Optimizer learining rate """
+    """Optimizer learining rate"""
 
     batch_size: int = 5
     """The batch size during train steps"""
 
-    device = torch.device("cuda")
-    """ Where to run computation"""
+    device: torch.device = torch.device("cuda")
+    """Where to run computation"""
 
 
 def init_parser() -> argparse.ArgumentParser:
