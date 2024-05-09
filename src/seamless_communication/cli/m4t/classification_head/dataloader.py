@@ -133,7 +133,7 @@ class UnitYLanguageIDDataLoader:
         )
         return data_loader
 
-    def __iter__(self) -> Iterable[MultimodalSeqsBatch]:
+    def __iter__(self) -> Iterable:
         return self.get_dataloader().__iter__()
 
     def _get_source_fbank(self, sample: LangPairSample) -> Tensor:
@@ -173,7 +173,7 @@ class UnitYLanguageIDDataLoader:
             logger.exception(f"Failed to load sample path: {sample.source.audio_local_path}")
             return True
 
-    def _collate(self, raw_samples: List[Dict[str, Any]]) -> MultimodalSeqsBatch:
+    def _collate(self, raw_samples: List[Dict[str, Any]]):
         samples = [ LangPairSample.from_json(sample) for sample in raw_samples ]
         
         ## Input Speech
@@ -198,7 +198,7 @@ class UnitYLanguageIDDataLoader:
         source_langs = [ sample.source.lang for sample in samples ]
         onehot_labels = torch.nn.functional.one_hot(torch.tensor(le.fit_transform(source_langs)))
             
-        return SeqsBatch(src_tokens, src_lengths), onehot_labels
+        return SeqsBatch(src_tokens=src_tokens, src_lengths=src_lengths), onehot_labels
 
     def _load_manifest(self, dataset_manifest_path: str) -> Dataset:
         with open(dataset_manifest_path) as fp_in:
