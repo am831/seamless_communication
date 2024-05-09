@@ -184,17 +184,17 @@ def train(head: torch.nn.Module,
             logger.info(f"Epoch {epoch}")
             
             # Run batches through train step
-            for batch in tqdm(dataloader.get_dataloader(), desc="Training Steps"):
+            for seqs, labels in tqdm(dataloader.get_dataloader(), desc="Training Steps"):
                 optimizer.zero_grad()
                 with torch.autocast(device_type=params.device.type, dtype=params.float_dtype):
-                    vector, _ = frozen_model.encode(batch)
+                    vector, _ = frozen_model.encode(seqs)
                 
-                _y = head(vector)
+                probs = head(vector)
                 
-                loss = torch.nn.functional.cross_entropy(batch, _y, weight=label_weights)
+                loss = torch.nn.functional.cross_entropy(labels, probs, weight=label_weights)
                 if loss.isnan().any().item():
                     error = RuntimeError("Train loss is NaN! Something is wrong in the model!")
-                    logger.error(batch.speech_to_text)
+                    logger.error(seqs.speech_to_text)
                     logger.error(error)
                     raise error
                 
@@ -207,7 +207,7 @@ def train(head: torch.nn.Module,
                 grad_scaler.update()
                 lr_scheduler.step()
                 
-                assert batch.speech_to_text.src_tokens is not None
+                assert seqs.speech_to_text.src_tokens is not None
 
     # Catch SIGINT (^C) keyboard interrupt, and save model before terminating
     except KeyboardInterrupt:

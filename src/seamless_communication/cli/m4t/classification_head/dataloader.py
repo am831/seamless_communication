@@ -21,6 +21,7 @@ from fairseq2.data.audio import WaveformToFbankConverter
 from torch import Tensor
 from torch.nn.functional import pad as pad_tensor
 from torch.utils.data import DataLoader
+from sklearn.preprocessing import LabelEncoder
 
 from seamless_communication.datasets.datatypes import LangPairSample
 from seamless_communication.models.unity.unit_tokenizer import (
@@ -173,33 +174,31 @@ class UnitYLanguageIDDataLoader:
             return True
 
     def _collate(self, raw_samples: List[Dict[str, Any]]) -> MultimodalSeqsBatch:
-        samples = [LangPairSample.from_json(sample) for sample in raw_samples]
+        samples = [ LangPairSample.from_json(sample) for sample in raw_samples ]
         
-        ## Input speech
+        ## Input Speech
+        
         # 1 - filter long audio samples
-        filtered_samples = [sample for sample in samples if not self._is_long_src_audio(sample)]
+        filtered_samples = [ sample for sample in samples if not self._is_long_src_audio(sample) ]
         samples = filtered_samples if filtered_samples else [samples[0]]  # keep at least one sample
-        src_tokens_list = [self._get_source_fbank(sample) for sample in samples]
+        src_tokens_list = [ self._get_source_fbank(sample) for sample in samples ]
+        
         # 2 - filter NaNs in fbanks´´
-        with_nans = [fbank.isnan().any().item() for fbank in src_tokens_list]
-        samples = [sample for sample, skip in zip(samples, with_nans) if not skip]
+        with_nans = [ fbank.isnan().any().item() for fbank in src_tokens_list ]
+        samples = [ sample for sample, skip in zip(samples, with_nans) if not skip ]
         assert len(samples) > 0
         src_tokens_list = [ tok for tok, skip in zip(src_tokens_list, with_nans) if not skip ]
         src_tokens = self._batch_tensors(
             src_tokens_list, pad_value=self.batching_config.fbank_feats_pad_idx
         ).to(self.batching_config.float_dtype)
-        src_lengths = torch.LongTensor([tok.shape[0] for tok in src_tokens_list])
+        src_lengths = torch.LongTensor([ tok.shape[0] for tok in src_tokens_list ])
         
-        # output text
-        target_langs = [ sample.target.lang for sample in samples ]
-        ...
+        ## Output Label
+        le = LabelEncoder()
+        source_langs = [ sample.source.lang for sample in samples ]
+        onehot_labels = torch.nn.functional.one_hot(torch.tensor(le.fit_transform(source_langs)))
             
-        return MultimodalSeqsBatch(
-            speech_to_text=SeqsBatch(
-                src_tokens=src_tokens,
-                src_lengths=src_lengths,
-            )
-        )
+        return SeqsBatch(src_tokens, src_lengths), onehot_labels
 
     def _load_manifest(self, dataset_manifest_path: str) -> Dataset:
         with open(dataset_manifest_path) as fp_in:
