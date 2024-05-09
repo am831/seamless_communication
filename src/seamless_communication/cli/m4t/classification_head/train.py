@@ -38,6 +38,8 @@ logger = logging.getLogger("train_classification_head")
 class ClassificationHeadTrainParams:
     save_model_path: Path
     
+    float_dtype: torch.dtype
+    
     max_epochs: int = 10
     """Maximum number of trainign epochs"""
 
@@ -254,6 +256,7 @@ def main() -> None:
         dataloader=train_dataloader,
         params=ClassificationHeadTrainParams(
             save_model_path=Path(args.save_model_path),
+            float_dtype=float_dtype,
             max_epochs=args.max_epochs,
             warmup_steps=args.warmup_steps,
             learning_rate=args.learning_rate,
