@@ -178,6 +178,7 @@ def train(head: torch.nn.Module,
             # Run batches through train step
             for seqs, labels in tqdm(dataloader.get_dataloader(), desc="Training Steps"):
                 optimizer.zero_grad()
+                assert seqs.src_tokens is not None
                 with torch.autocast(device_type=params.device.type, dtype=params.float_dtype):
                     vector, _ = frozen_model.encode(seqs)
                 
@@ -186,7 +187,7 @@ def train(head: torch.nn.Module,
                 loss = torch.nn.functional.cross_entropy(labels, probs, weight=label_weights)
                 if loss.isnan().any().item():
                     error = RuntimeError("Train loss is NaN! Something is wrong in the model!")
-                    logger.error(seqs.speech_to_text)
+                    logger.error(seqs)
                     logger.error(error)
                     raise error
                 
@@ -199,7 +200,6 @@ def train(head: torch.nn.Module,
                 grad_scaler.update()
                 lr_scheduler.step()
                 
-                assert seqs.speech_to_text.src_tokens is not None
 
     # Catch SIGINT (^C) keyboard interrupt, and save model before terminating
     except KeyboardInterrupt:

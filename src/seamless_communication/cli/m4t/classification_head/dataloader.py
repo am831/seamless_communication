@@ -36,9 +36,9 @@ logger = logging.getLogger(__name__)
 class SeqsBatch:
     src_tokens: Optional[Tensor]
     src_lengths: Optional[Tensor]
-    target_tokens: Optional[Tensor]
-    prev_output_tokens: Optional[Tensor]
-    target_lengths: Optional[Tensor]
+    target_tokens: Optional[Tensor] = None
+    prev_output_tokens: Optional[Tensor] = None
+    target_lengths: Optional[Tensor] = None
 
     def __del__(self) -> None:
         """Explicitly delete tensors
