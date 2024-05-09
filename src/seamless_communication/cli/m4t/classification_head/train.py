@@ -148,11 +148,6 @@ def init_parser() -> argparse.ArgumentParser:
         default=2, 
         help="The number of layers in the classification head"
     )
-    parser.add_argument(
-        "--save_model_path", 
-        type=str,  
-        help="Where to save the trained head"
-    )
     return parser
 
 
