@@ -41,9 +41,6 @@ class ClassificationHeadTrainParams:
     max_epochs: int = 10
     """ Maximum number of trainign epochs"""
 
-    label_smoothing: float = 0.2
-    """ Label smoothing coefficient for nll_loss """
-
     warmup_steps: int = 100
     """ Number of steps with linearly increasing LR"""
 
@@ -258,7 +255,6 @@ def main() -> None:
         params=ClassificationHeadTrainParams(
             save_model_path=Path(args.save_model_path),
             max_epochs=args.max_epochs,
-            label_smoothing=args.label_smoothing,
             warmup_steps=args.warmup_steps,
             learning_rate=args.learning_rate,
             batch_size=args.batch_size,
