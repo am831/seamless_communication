@@ -182,9 +182,10 @@ def train(head: torch.nn.Module,
             for seqs, labels in tqdm(dataloader.get_dataloader(), desc="Training Steps"):
                 optimizer.zero_grad()
                 assert seqs.src_tokens is not None
+                seqs.src_tokens = seqs.src_tokens.to(params.device)
                 with torch.autocast(device_type=params.device.type, dtype=params.float_dtype):
-                    mask = PaddingMask(seqs.src_lengths, seqs.src_tokens.size(1))
-                    vector, _ = frozen_model.encode(seqs.src_tokens.to(params.device), padding_mask=mask)
+                    mask = PaddingMask(seqs.src_lengths, seqs.src_tokens.size(1)).to(params.device)
+                    vector, _ = frozen_model.encode(seqs.src_tokens, padding_mask=mask)
                 
                 probs = head(vector)
                 
