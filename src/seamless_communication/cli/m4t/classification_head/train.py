@@ -161,7 +161,7 @@ def train(head: torch.nn.Module,
     
     grad_scaler = torch.cuda.amp.GradScaler()
     optimizer = AdamW(
-        params=frozen_model.parameters(),
+        params=head.parameters(),
         lr=params.learning_rate,
         betas=(0.9, 0.98),
         eps=1e-08,
@@ -204,8 +204,6 @@ def train(head: torch.nn.Module,
                 grad_scaler.step(optimizer)
                 grad_scaler.update()
                 lr_scheduler.step()
-                
-
     # Catch SIGINT (^C) keyboard interrupt, and save model before terminating
     except KeyboardInterrupt:
         logger.info("[SIGINT] Saving optimizer state. Exiting cleanly...")
