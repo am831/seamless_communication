@@ -184,7 +184,7 @@ def train(head: torch.nn.Module,
                 assert seqs.src_tokens is not None
                 with torch.autocast(device_type=params.device.type, dtype=params.float_dtype):
                     mask = PaddingMask(seqs.src_lengths, seqs.src_tokens.size(1))
-                    vector, _ = frozen_model.encode(seqs.src_tokens, padding_mask=mask)
+                    vector, _ = frozen_model.encode(seqs.src_tokens.to(params.device), padding_mask=mask)
                 
                 probs = head(vector)
                 
