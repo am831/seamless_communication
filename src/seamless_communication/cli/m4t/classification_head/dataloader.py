@@ -203,8 +203,8 @@ class UnitYLanguageIDDataLoader:
             num_classes=self.num_languages)
         
         if src_tokens.size(0) != self.batching_config.batch_size:
-            src_tokens = torch.cat((src_tokens, src_tokens[-1]), dim=0)
-            onehot_labels = torch.cat((onehot_labels, onehot_labels[-1]), dim=0)
+            src_tokens = torch.cat((src_tokens, src_tokens[-1].unsqueeze(0)), dim=0)
+            onehot_labels = torch.cat((onehot_labels, onehot_labels[-1].unsqueeze(0)), dim=0)
             
         return SeqsBatch(src_tokens=src_tokens, src_lengths=src_lengths), onehot_labels
 
