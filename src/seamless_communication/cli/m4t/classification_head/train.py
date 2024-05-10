@@ -187,7 +187,7 @@ def train(head: torch.nn.Module,
                     mask = PaddingMask(seqs.src_lengths, seqs.src_tokens.size(1)).to(params.device)
                     vector, _ = frozen_model.encode(seqs.src_tokens, padding_mask=mask)
                 
-                probs = head(vector)
+                probs = head(vector).float()
                 
                 loss = torch.nn.functional.cross_entropy(labels, probs, weight=label_weights)
                 if loss.isnan().any().item():
