@@ -245,6 +245,7 @@ def main() -> None:
 
     # Create daataloaders
     train_dataloader = dataloader.UnitYLanguageIDDataLoader(
+        num_languages=args.num_languages,
         text_tokenizer=text_tokenizer,
         unit_tokenizer=unit_tokenizer,
         batching_config=dataloader.BatchingConfig(
