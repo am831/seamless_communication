@@ -200,7 +200,7 @@ class UnitYLanguageIDDataLoader:
         source_langs = [ sample.source.lang for sample in samples ]
         onehot_labels = torch.nn.functional.one_hot(
             torch.tensor(le.fit_transform(source_langs)),
-            num_classes=self.num_languages)
+            num_classes=self.num_languages).long()
         
         if src_tokens.size(0) != self.batching_config.batch_size:
             src_tokens = torch.cat((src_tokens, src_tokens[-1].unsqueeze(0)), dim=0)
