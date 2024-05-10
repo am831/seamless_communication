@@ -232,7 +232,7 @@ def main() -> None:
         for param in module.parameters():
             param.requires_grad = False
 
-    head = ClassificationHead(1024, args.num_layers, args.num_languages)
+    head = ClassificationHead(args.batch_size, args.num_layers, args.num_languages)
     head.train()
 
     assert model.target_vocab_info == text_tokenizer.vocab_info
