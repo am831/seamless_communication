@@ -152,12 +152,14 @@ def init_parser() -> argparse.ArgumentParser:
 
 
 def train(head: torch.nn.Module,
-            frozen_model: UnitYModel,
-            dataloader: dataloader.UnitYLanguageIDDataLoader,
-            params: ClassificationHeadTrainParams,
-            label_weights: torch.Tensor = None):
+          frozen_model: UnitYModel,
+          dataloader: dataloader.UnitYLanguageIDDataLoader,
+          params: ClassificationHeadTrainParams,
+          label_weights: torch.Tensor = None):
     
     logger.info("Start Training Language Head")
+    
+    head = head.to(params.device)
     
     grad_scaler = torch.cuda.amp.GradScaler()
     optimizer = AdamW(
