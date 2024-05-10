@@ -159,8 +159,6 @@ def train(head: torch.nn.Module,
     
     logger.info("Start Training Language Head")
     
-    head = head.to(params.device)
-    
     grad_scaler = torch.cuda.amp.GradScaler()
     optimizer = AdamW(
         params=frozen_model.parameters(),
@@ -235,7 +233,7 @@ def main() -> None:
         for param in module.parameters():
             param.requires_grad = False
 
-    classification_head = ClassificationHead(args.num_languages, args.num_layers)
+    head = ClassificationHead(1024, args.num_layers, args.num_languages)
 
     assert model.target_vocab_info == text_tokenizer.vocab_info
     if model.text_encoder is not None:
@@ -243,6 +241,7 @@ def main() -> None:
     
     # Put model on selected device
     model = model.to(device)
+    head = head.to(device)
 
     # Create daataloaders
     train_dataloader = dataloader.UnitYLanguageIDDataLoader(
@@ -256,7 +255,7 @@ def main() -> None:
         dataset_manifest_path=args.train_dataset)
     
     trained_head, losslog = train(
-        head=classification_head,
+        head=head,
         frozen_model=model,
         dataloader=train_dataloader,
         params=ClassificationHeadTrainParams(
