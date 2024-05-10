@@ -189,7 +189,7 @@ def train(head: torch.nn.Module,
                 
                 probs = head(vector).float()
                 
-                loss = torch.nn.functional.cross_entropy(labels, probs, weight=label_weights)
+                loss = torch.nn.functional.cross_entropy(labels.to(params.device), probs, weight=label_weights)
                 if loss.isnan().any().item():
                     error = RuntimeError("Train loss is NaN! Something is wrong in the model!")
                     logger.error(seqs)
