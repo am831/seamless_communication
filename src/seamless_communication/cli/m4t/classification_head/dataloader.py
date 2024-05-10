@@ -97,11 +97,13 @@ class UnitYLanguageIDDataLoader:
 
     def __init__(
         self,
+        num_languages: int,
         text_tokenizer: NllbTokenizer,
         unit_tokenizer: UnitTokenizer,
         dataset_manifest_path: str,
         batching_config: BatchingConfig,
     ):
+        self.num_languages = num_languages
         self.text_tokenizer = text_tokenizer
         self.text_encoders_per_lang: Dict[str, TextTokenEncoder] = {}
         self.unit_tokenizer = unit_tokenizer
@@ -196,7 +198,9 @@ class UnitYLanguageIDDataLoader:
         ## Output Label
         le = LabelEncoder()
         source_langs = [ sample.source.lang for sample in samples ]
-        onehot_labels = torch.nn.functional.one_hot(torch.tensor(le.fit_transform(source_langs)))
+        onehot_labels = torch.nn.functional.one_hot(
+            torch.tensor(le.fit_transform(source_langs)),
+            num_classes=self.num_languages)
             
         return SeqsBatch(src_tokens=src_tokens, src_lengths=src_lengths), onehot_labels
 
