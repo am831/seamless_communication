@@ -180,16 +180,18 @@ def train(head: torch.nn.Module,
             
             # Run batches through train step
             for seqs, labels in tqdm(dataloader.get_dataloader(), desc="Training Steps"):
-                optimizer.zero_grad()
                 assert seqs.src_tokens is not None
+                optimizer.zero_grad()
                 seqs.src_tokens = seqs.src_tokens.to(params.device)
+                labels = labels.to(params.device)
+                
                 with torch.autocast(device_type=params.device.type, dtype=params.float_dtype):
                     mask = PaddingMask(seqs.src_lengths, seqs.src_tokens.size(1)).to(params.device)
                     vector, _ = frozen_model.encode(seqs.src_tokens, padding_mask=mask)
                 
-                probs = head(vector).float()
+                probs = head(vector)
                 
-                loss = torch.nn.functional.cross_entropy(labels.to(params.device), probs, weight=label_weights)
+                loss = torch.nn.functional.cross_entropy(labels, probs, weight=label_weights)
                 if loss.isnan().any().item():
                     error = RuntimeError("Train loss is NaN! Something is wrong in the model!")
                     logger.error(seqs)
@@ -199,7 +201,11 @@ def train(head: torch.nn.Module,
                 losslog.append(loss.cpu().item())
                 if len(losslog) % 5 == 0:
                     logger.info(f"Train Loss: {sum(losslog[-5:]) / 5}")
-                    plot_losslog(losslog)
+                    plot_losslog(losslog, save_to=params.save_model_path.parent / ".checkpoints/losslog.png")
+                    
+                    if len(losslog) % 2 == 0:
+                        torch.save(head.state_dict(),
+                            params.save_model_path.parent / f".checkpoints/checkpoint-{len(losslog)//10}.pt")
                 
                 grad_scaler.scale(loss).backward()
                 grad_scaler.step(optimizer)

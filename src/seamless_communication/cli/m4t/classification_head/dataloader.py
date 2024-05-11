@@ -36,32 +36,16 @@ logger = logging.getLogger(__name__)
 class SeqsBatch:
     src_tokens: Optional[Tensor]
     src_lengths: Optional[Tensor]
-    target_tokens: Optional[Tensor] = None
-    prev_output_tokens: Optional[Tensor] = None
-    target_lengths: Optional[Tensor] = None
 
     def __del__(self) -> None:
         """Explicitly delete tensors
         to force GPU memory cleanup"""
         for tensor in [
             self.src_tokens,
-            self.src_lengths,
-            self.target_tokens,
-            self.prev_output_tokens,
-            self.target_lengths,
+            self.src_lengths
         ]:
             if tensor is not None:
                 del tensor
-
-
-@dataclass
-class MultimodalSeqsBatch:
-    speech_to_text: SeqsBatch
-    text_to_units: SeqsBatch
-
-    def __del__(self) -> None:
-        del self.speech_to_text
-        del self.text_to_units
 
 
 @dataclass
@@ -202,7 +186,7 @@ class UnitYLanguageIDDataLoader:
             torch.tensor(le.fit_transform(source_langs)),
             num_classes=self.num_languages).float()
         
-        while src_tokens.size(0) != self.batching_config.batch_size:
+        while src_tokens.size(0) < self.batching_config.batch_size:
             src_tokens = torch.cat((src_tokens, src_tokens[-1].unsqueeze(0)), dim=0)
             src_lengths = torch.cat((src_lengths, src_lengths[-1].unsqueeze(0)), dim=0)
             onehot_labels = torch.cat((onehot_labels, onehot_labels[-1].unsqueeze(0)), dim=0)

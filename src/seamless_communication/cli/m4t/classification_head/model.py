@@ -15,5 +15,5 @@ class ClassificationHead(nn.Module):
         x, _ = self.attn(x, x, x)
         for layer in self.layers:
             x = nn.functional.relu(layer(x))
-        return nn.functional.softmax(x[:, 0])
+        return nn.functional.softmax(x[:, 0]).float()
     
